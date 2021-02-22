@@ -1,6 +1,6 @@
 ---
 title: 'Weekly Exercises #5'
-author: "Put your name here"
+author: "Franco Salinas"
 output: 
   html_document:
     keep_md: TRUE
@@ -33,6 +33,9 @@ library(gganimate)     # for adding animation layers to ggplots
 library(transformr)    # for "tweening" (gganimate)
 library(gifski)        # need the library for creating gifs but don't need to load each time
 library(shiny)         # for creating interactive apps
+library(lubridate)     # for date manipulation
+library(ggthemes)      # for even more plotting themes
+library(janitor)  
 theme_set(theme_minimal())
 ```
 
@@ -83,10 +86,102 @@ Once your repository is created, you should always open your **project** rather 
 
   1. Choose 2 graphs you have created for ANY assignment in this class and add interactivity using the `ggplotly()` function.
   
-  2. Use animation to tell an interesting story with the `small_trains` dataset that contains data from the SNCF (National Society of French Railways). These are Tidy Tuesday data! Read more about it [here](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-02-26).
+```{r, eval = FALSE}
+clean_garden <- garden_harvest %>% 
+  filter(vegetable %in% c('tomatoes',
+                          'lettuce',
+                          'beans',
+                          'zucchini',
+                          'cucumbers',
+                          'peas',
+                          'spinach',
+                          'carrots')) %>% 
+  group_by(vegetable, date) %>% 
+  summarize(sum_weight = sum(weight)) %>% 
+  ungroup() %>% 
+  mutate(vegetable = fct_reorder(vegetable, sum_weight, sum, .desc = TRUE))
+  
+clean_garden %>% 
+  ggplot(aes(x = date, y = sum_weight, color = vegetable))+
+  geom_line()+
+  theme(legend.position = 'none', 
+        text = element_text(size = 10))+
+  geom_text(aes(label = vegetable))+
+  labs(title = 'Vegetables with largest harvest in grams during the fall',
+       x = '',
+       y = '',
+       subtitle = "Date: {frame_along}")+
+  scale_color_manual(values = c('tomatoes'='red',
+                               'zucchini' = 'darkseagreen',
+                               'cucumbers' = 'green',
+                               'beans' = 'burlywood',
+                                'peas'  = 'green2',
+                               'carrots' = 'darkorange',
+                               'lettuce' = 'chartreuse',
+                               'spinach' = 'darkgreen'))+
+  transition_reveal(date)
+  
+```
+
+```{r, eval=FALSE}
+anim_save("veggies.gif")
+```
 
 ```{r}
+knitr::include_graphics("veggies.gif")
+```
 
+```{r, eval=FALSE}
+income_aggregate <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_aggregate.csv')
+
+
+income_aggregate %>% 
+  filter(income_quintile %in% c("Top 5%","Highest","Lowest"), 
+         race %in% c("Hispanic","Black Alone", "White Alone", "Asian Alone"),
+         year %in% c(2009:2020)) %>%
+  ggplot(aes(x = year, y = income_share, color = income_quintile))+
+  geom_line(size = 1)+
+  labs(title = "Income share for different quintiles across time and races", 
+       x = "", 
+       y = "Income share",
+       color = "Income quintile", 
+       subtitle = "Race: {closest_state}",
+       caption = "Franco Salinas")+
+  theme(panel.background = element_rect(fill = "gray"),
+        axis.text.x.bottom = element_text(size = 0))+
+  transition_states(race)
+```
+
+```{r,eval=FALSE}
+anim_save("races.gif")
+```
+
+```{r}
+knitr::include_graphics("races.gif")
+```
+
+
+  2. Use animation to tell an interesting story with the `small_trains` dataset that contains data from the SNCF (National Society of French Railways). These are Tidy Tuesday data! Read more about it [here](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-02-26).
+
+```{r, eval = FALSE}
+small_trains %>% 
+  ggplot(aes(y = journey_time_avg, 
+             x = year, color = departure_station)) +
+  geom_point() +
+  labs(title = "Journey average time (minutes) across French stations",
+       subtitle = "Departure Stations:{closest_state}",
+       x = "",
+       y = "")+
+  transition_states(departure_station, transition_length = 2, state_length = 3)+
+  theme(legend.position = 0)
+```
+
+```{r, eval = FALSE}
+anim_save("smalltrains.gif")
+```
+
+```{r}
+knitr::include_graphics("smalltrains.gif")
 ```
 
 ## Garden data
@@ -99,13 +194,30 @@ Once your repository is created, you should always open your **project** rather 
 
 I have started the code for you below. The `complete()` function creates a row for all unique `date`/`variety` combinations. If a variety is not harvested on one of the harvest dates in the dataset, it is filled with a value of 0.
 
-```{r}
+```{r, eval = FALSE}
 garden_harvest %>% 
   filter(vegetable == "tomatoes") %>% 
   group_by(date, variety) %>% 
   summarize(daily_harvest_lb = sum(weight)*0.00220462) %>% 
   ungroup() %>% 
-  complete(variety, date, fill = list(daily_harvest_lb = 0))
+  complete(variety, date, fill = list(daily_harvest_lb = 0)) %>% 
+  ggplot(aes(y = daily_harvest_lb, x = date, 
+             fill = fct_reorder(variety,daily_harvest_lb))) +
+  geom_area()+
+  theme(legend.position = 0)+
+  labs(fill = "Variety",
+       title = "Cumulative pounds of tomato varieties harvested over time",
+       x = "",
+       y = "")+
+  transition_reveal(date)
+```
+
+```{r, eval = FALSE}
+anim_save("tomatoes.gif")
+```
+
+```{r}
+knitr::include_graphics("tomatoes.gif")
 ```
 
 
@@ -121,11 +233,87 @@ garden_harvest %>%
   * CHALLENGE: use the `ggimage` package and `geom_image` to add a bike image instead of a red point. You can use [this](https://raw.githubusercontent.com/llendway/animation_and_interactivity/master/bike.png) image. See [here](https://goodekat.github.io/presentations/2019-isugg-gganimate-spooky/slides.html#35) for an example. 
   * Add something of your own! And comment on if you prefer this to the static map and why or why not.
   
-  5. In this exercise, you get to meet my sister, Heather! She is a proud Mac grad, currently works as a Data Scientist at 3M where she uses R everyday, and for a few years (while still holding a full-time job) she was a pro triathlete. You are going to map one of her races. The data from each discipline of the Ironman 70.3 Pan Am championships, Panama is in a separate file - `panama_swim`, `panama_bike`, and `panama_run`. Create a similar map to the one you created with my cycling data. You will need to make some small changes: 1. combine the files (HINT: `bind_rows()`, 2. make the leading dot a different color depending on the event (for an extra challenge, make it a different image using `geom_image()!), 3. CHALLENGE (optional): color by speed, which you will need to compute on your own from the data. You can read Heather's race report [here](https://heatherlendway.com/2016/02/10/ironman-70-3-pan-american-championships-panama-race-report/). She is also in the Macalester Athletics [Hall of Fame](https://athletics.macalester.edu/honors/hall-of-fame/heather-lendway/184) and still has records at the pool. 
+  
+```{r, eval = FALSE}
+
+mallorca_map <- get_stamenmap(
+    bbox = c(left = 2.28 , bottom = 39.41, right = 3.03 , top = 39.8), 
+    maptype = "terrain",
+    zoom = 10
+)
+
+
+ggmap(mallorca_map) +
+  geom_point(data = mallorca_bike_day7, 
+             aes(x = lon, y = lat),
+             size = 1, color = "red")+
+  geom_path(data = mallorca_bike_day7, 
+             aes(x = lon, y = lat, color = ele),
+             size = .5) +
+  scale_color_viridis_c(option = "magma") +
+  theme_map() +
+  theme(legend.background = element_blank())+
+  labs(title = "Mallorca ride",
+       subtitle = "Time:{frame_along}",
+       color = "Elevation")+
+  annotate(geom = "text",
+           x = 2.586255,
+           y = 39.66033,
+           label = "Start",
+           color = "Blue")+
+  transition_reveal(time)
+```
+  
+```{r, eval = FALSE}
+anim_save("mallorca.gif")
+```
   
 ```{r}
-
+knitr::include_graphics("mallorca.gif")
 ```
+  
+>I prefer this to the static map because I can see the route followed in the correct direction and progression. 
+  
+  
+  5. In this exercise, you get to meet my sister, Heather! She is a proud Mac grad, currently works as a Data Scientist at 3M where she uses R everyday, and for a few years (while still holding a full-time job) she was a pro triathlete. You are going to map one of her races. The data from each discipline of the Ironman 70.3 Pan Am championships, Panama is in a separate file - `panama_swim`, `panama_bike`, and `panama_run`. 
+Create a similar map to the one you created with my cycling data. You will need to make some small changes: 
+1. combine the files (HINT: `bind_rows()`, 
+2. make the leading dot a different color depending on the event (for an extra challenge, make it a different image using `geom_image()!), 
+3. CHALLENGE (optional): color by speed, which you will need to compute on your own from the data. You can read Heather's race report [here](https://heatherlendway.com/2016/02/10/ironman-70-3-pan-american-championships-panama-race-report/). She is also in the Macalester Athletics [Hall of Fame](https://athletics.macalester.edu/honors/hall-of-fame/heather-lendway/184) and still has records at the pool. 
+  
+```{r, eval = FALSE}
+bind <- bind_rows(panama_swim,panama_bike,panama_run)
+bind
+
+panama_map <- get_stamenmap(
+    bbox = c(left =-79.6311 , bottom = 8.8942, right = -79.4440 , top = 8.9915), 
+    maptype = "terrain",
+    zoom = 12
+)
+
+ggmap(panama_map) +
+  geom_point(data = bind, 
+             aes(x = lon, y = lat, color = event),
+             size = 3)+
+  geom_path(data = bind, 
+             aes(x = lon, y = lat),
+             size = .5) +   
+  theme_map() +
+  theme(legend.background = element_blank())+
+  labs(title = "Panama",
+       subtitle = "Time:{frame_along}")+
+  transition_reveal(time)
+```
+  
+```{r,eval= FALSE}
+anim_save("panama.gif")
+```
+  
+
+```{r}
+knitr::include_graphics("panama.gif")
+```
+
   
 ## COVID-19 data
 
