@@ -16,180 +16,25 @@ output:
 
 ```r
 library(tidyverse)     # for data cleaning and plotting
-```
-
-```
-## ── Attaching packages ────────────────────────────────────────────── tidyverse 1.3.0 ──
-```
-
-```
-## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
-## ✓ tibble  3.0.3     ✓ dplyr   1.0.2
-## ✓ tidyr   1.1.2     ✓ stringr 1.4.0
-## ✓ readr   1.3.1     ✓ forcats 0.5.0
-```
-
-```
-## ── Conflicts ───────────────────────────────────────────────── tidyverse_conflicts() ──
-## x dplyr::filter() masks stats::filter()
-## x dplyr::lag()    masks stats::lag()
-```
-
-```r
 library(gardenR)       # for Lisa's garden data
 library(lubridate)     # for date manipulation
-```
-
-```
-## 
-## Attaching package: 'lubridate'
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     date, intersect, setdiff, union
-```
-
-```r
 library(openintro)     # for the abbr2state() function
-```
-
-```
-## Loading required package: airports
-```
-
-```
-## Loading required package: cherryblossom
-```
-
-```
-## Loading required package: usdata
-```
-
-```r
 library(palmerpenguins)# for Palmer penguin data
 library(maps)          # for map data
-```
-
-```
-## 
-## Attaching package: 'maps'
-```
-
-```
-## The following object is masked from 'package:purrr':
-## 
-##     map
-```
-
-```r
 library(ggmap)         # for mapping points on maps
-```
-
-```
-## Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
-```
-
-```
-## Please cite ggmap if you use it! See citation("ggmap") for details.
-```
-
-```r
 library(gplots)        # for col2hex() function
-```
-
-```
-## 
-## Attaching package: 'gplots'
-```
-
-```
-## The following object is masked from 'package:stats':
-## 
-##     lowess
-```
-
-```r
 library(RColorBrewer)  # for color palettes
 library(sf)            # for working with spatial data
-```
-
-```
-## Linking to GEOS 3.8.1, GDAL 3.1.1, PROJ 6.3.1
-```
-
-```r
 library(leaflet)       # for highly customizable mapping
 library(ggthemes)      # for more themes (including theme_map())
 library(plotly)        # for the ggplotly() - basic interactivity
-```
-
-```
-## 
-## Attaching package: 'plotly'
-```
-
-```
-## The following object is masked from 'package:ggmap':
-## 
-##     wind
-```
-
-```
-## The following object is masked from 'package:ggplot2':
-## 
-##     last_plot
-```
-
-```
-## The following object is masked from 'package:stats':
-## 
-##     filter
-```
-
-```
-## The following object is masked from 'package:graphics':
-## 
-##     layout
-```
-
-```r
 library(gganimate)     # for adding animation layers to ggplots
 library(transformr)    # for "tweening" (gganimate)
-```
-
-```
-## 
-## Attaching package: 'transformr'
-```
-
-```
-## The following object is masked from 'package:sf':
-## 
-##     st_normalize
-```
-
-```r
 library(gifski)        # need the library for creating gifs but don't need to load each time
 library(shiny)         # for creating interactive apps
 library(lubridate)     # for date manipulation
 library(ggthemes)      # for even more plotting themes
 library(janitor)  
-```
-
-```
-## 
-## Attaching package: 'janitor'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     chisq.test, fisher.test
-```
-
-```r
 theme_set(theme_minimal())
 ```
 
@@ -197,122 +42,23 @@ theme_set(theme_minimal())
 ```r
 # SNCF Train data
 small_trains <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-02-26/small_trains.csv") 
-```
 
-```
-## Parsed with column specification:
-## cols(
-##   year = col_double(),
-##   month = col_double(),
-##   service = col_character(),
-##   departure_station = col_character(),
-##   arrival_station = col_character(),
-##   journey_time_avg = col_double(),
-##   total_num_trips = col_double(),
-##   avg_delay_all_departing = col_double(),
-##   avg_delay_all_arriving = col_double(),
-##   num_late_at_departure = col_double(),
-##   num_arriving_late = col_double(),
-##   delay_cause = col_character(),
-##   delayed_number = col_double()
-## )
-```
-
-```r
 # Lisa's garden data
 data("garden_harvest")
 
 # Lisa's Mallorca cycling data
 mallorca_bike_day7 <- read_csv("https://www.dropbox.com/s/zc6jan4ltmjtvy0/mallorca_bike_day7.csv?dl=1") %>% 
   select(1:4, speed)
-```
 
-```
-## Parsed with column specification:
-## cols(
-##   lon = col_double(),
-##   lat = col_double(),
-##   ele = col_double(),
-##   time = col_datetime(format = ""),
-##   extensions = col_double(),
-##   ele.num = col_double(),
-##   date = col_date(format = ""),
-##   hrminsec = col_datetime(format = ""),
-##   time_hr = col_double(),
-##   dist_km = col_double(),
-##   speed = col_double()
-## )
-```
-
-```r
 # Heather Lendway's Ironman 70.3 Pan Am championships Panama data
 panama_swim <- read_csv("https://raw.githubusercontent.com/llendway/gps-data/master/data/panama_swim_20160131.csv")
-```
 
-```
-## Parsed with column specification:
-## cols(
-##   lon = col_double(),
-##   lat = col_double(),
-##   time = col_datetime(format = ""),
-##   extensions = col_double(),
-##   ele = col_logical(),
-##   event = col_character(),
-##   date = col_date(format = ""),
-##   hrminsec = col_datetime(format = "")
-## )
-```
-
-```r
 panama_bike <- read_csv("https://raw.githubusercontent.com/llendway/gps-data/master/data/panama_bike_20160131.csv")
-```
 
-```
-## Parsed with column specification:
-## cols(
-##   lon = col_double(),
-##   lat = col_double(),
-##   ele = col_double(),
-##   time = col_datetime(format = ""),
-##   extensions = col_double(),
-##   event = col_character(),
-##   date = col_date(format = ""),
-##   hrminsec = col_datetime(format = "")
-## )
-```
-
-```r
 panama_run <- read_csv("https://raw.githubusercontent.com/llendway/gps-data/master/data/panama_run_20160131.csv")
-```
 
-```
-## Parsed with column specification:
-## cols(
-##   lon = col_double(),
-##   lat = col_double(),
-##   ele = col_double(),
-##   time = col_datetime(format = ""),
-##   extensions = col_double(),
-##   event = col_character(),
-##   date = col_date(format = ""),
-##   hrminsec = col_datetime(format = "")
-## )
-```
-
-```r
 #COVID-19 data from the New York Times
 covid19 <- read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv")
-```
-
-```
-## Parsed with column specification:
-## cols(
-##   date = col_date(format = ""),
-##   state = col_character(),
-##   fips = col_character(),
-##   cases = col_double(),
-##   deaths = col_double()
-## )
 ```
 
 ## Put your homework on GitHub!
@@ -662,14 +408,6 @@ census_pop_est_2018 <- read_csv("https://www.dropbox.com/s/6txwv3b4ng7pepe/us_ce
   mutate(state = str_to_lower(state))
 ```
 
-```
-## Parsed with column specification:
-## cols(
-##   state = col_character(),
-##   est_pop_2018 = col_double()
-## )
-```
-
 
 ```r
 states_map <- map_data("state")
@@ -717,7 +455,7 @@ knitr::include_graphics("covid_10k.gif")
 
 ![](covid_10k.gif)<!-- -->
 
-
+>The number of cases per 10000 people seems to stop growing earlier for both Oregon and Washington state. The number of cases per 10000 people seems to grow faster at North and South Dakota after October 2020. 
 
 ## Your first `shiny` app (for next week!)
 
@@ -729,5 +467,6 @@ NOT DUE THIS WEEK! If any of you want to work ahead, this will be on next week's
 
   9. Below, provide a link to your GitHub page with this set of Weekly Exercises. Specifically, if the name of the file is 05_exercises.Rmd, provide a link to the 05_exercises.md file, which is the one that will be most readable on GitHub. If that file isn't very readable, then provide a link to your main GitHub page.
 
+[this link](https://github.com/francos1998/weekly_excercise_5/blob/main/05_exercises.md)
 
 **DID YOU REMEMBER TO UNCOMMENT THE OPTIONS AT THE TOP?**
