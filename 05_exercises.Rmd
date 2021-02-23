@@ -201,10 +201,11 @@ garden_harvest %>%
   summarize(daily_harvest_lb = sum(weight)*0.00220462) %>% 
   ungroup() %>% 
   complete(variety, date, fill = list(daily_harvest_lb = 0)) %>% 
-  ggplot(aes(y = daily_harvest_lb, x = date, 
-             fill = fct_reorder(variety,daily_harvest_lb))) +
-  geom_area()+
-  theme(legend.position = 0)+
+  group_by(variety) %>% 
+  mutate(cumsum = cumsum(daily_harvest_lb)) %>% 
+  ggplot(aes(y = cumsum, x = date, 
+             fill = fct_reorder(variety, daily_harvest_lb))) +
+  geom_area(position = "stack")+
   labs(fill = "Variety",
        title = "Cumulative pounds of tomato varieties harvested over time",
        x = "",
@@ -320,10 +321,43 @@ knitr::include_graphics("panama.gif")
   6. In this exercise, you are going to replicate many of the features in [this](https://aatishb.com/covidtrends/?region=US) visualization by Aitish Bhatia but include all US states. Requirements:
  * Create a new variable that computes the number of new cases in the past week (HINT: use the `lag()` function you've used in a previous set of exercises). Replace missing values with 0's using `replace_na()`.  
   * Filter the data to omit rows where the cumulative case counts are less than 20.  
-  * Create a static plot with cumulative cases on the x-axis and new cases in the past 7 days on the y-axis. Connect the points for each state over time. HINTS: use `geom_path()` and add a `group` aesthetic.  Put the x and y axis on the log scale and make the tick labels look nice - `scales::comma` is one option. This plot will look pretty ugly as is.
+  * Create a static plot with cumulative cases on the x-axis and new cases in the past 7 days on the y-axis.
+  Connect the points for each state over time. HINTS: use `geom_path()` and add a `group` aesthetic.  
+  Put the x and y axis on the log scale and make the tick labels look nice - `scales::comma` is one option. This plot will look pretty ugly as is.
   * Animate the plot to reveal the pattern by date. Display the date as the subtitle. Add a leading point to each state's line (`geom_point()`) and add the state name as a label (`geom_text()` - you should look at the `check_overlap` argument).  
   * Use the `animate()` function to have 200 frames in your animation and make it 30 seconds long. 
   * Comment on what you observe.
+  
+```{r, eval = FALSE}
+cumcases <- covid19 %>% 
+  mutate(cumcases = cumsum(cases),
+         sevenlag = lag(cumcases,n = 7,order_by = date)) %>% 
+  replace_na(list(sevenlag = 0)) %>% 
+  mutate(newcases = cumcases - sevenlag) %>% 
+  filter(cumcases>20)
+
+cases_animate <- cumcases %>% 
+  ggplot(aes(x = cumcases, y = newcases, group = state)) +
+  scale_y_log10(labels = scales::comma)+
+  scale_x_log10(labels = scales::comma)+
+  geom_path()+
+  geom_point(aes(color = state))+
+  geom_text(aes(label = state), check_overlap = TRUE, color = "pink")+
+  theme(legend.position = 0)+
+  transition_reveal(date)
+
+animate(cases_animate, nframes = 200, duration = 30)
+```
+  
+```{r, eval = FALSE}
+anim_save("covid.gif")
+```
+  
+```{r}
+knitr::include_graphics("covid.gif")
+```
+ 
+> I observe that New York was the state with the highest proportion of new cases per unit increased in cumulative cases. However, Florida took over in the second half of the time frame. 
   
   7. In this exercise you will animate a map of the US, showing how cumulative COVID-19 cases per 10,000 residents has changed over time. This is similar to exercises 11 & 12 from the previous exercises, with the added animation! So, in the end, you should have something like the static map you made there, but animated over all the days. The code below gives the population estimates for each state and loads the `states_map` data. Here is a list of details you should include in the plot:
   
@@ -339,9 +373,50 @@ census_pop_est_2018 <- read_csv("https://www.dropbox.com/s/6txwv3b4ng7pepe/us_ce
   separate(state, into = c("dot","state"), extra = "merge") %>% 
   select(-dot) %>% 
   mutate(state = str_to_lower(state))
+```
 
+```{r, eval= TRUE}
 states_map <- map_data("state")
 ```
+
+```{r, eval= FALSE}
+cumulative_10k <- covid19 %>% 
+    mutate(state_name = str_to_lower(state)) %>% 
+    left_join(census_pop_est_2018,
+            by = c("state_name" = "state")) %>% 
+    group_by(state) %>% 
+    mutate(cases_per_10000 = (cases/est_pop_2018)*10000,
+           week_day = wday(date)) %>% 
+    filter(week_day == 5)
+    
+cases_10k_anim <- cumulative_10k %>% 
+  ggplot() +
+  geom_map(map = states_map,
+           aes(map_id = state_name,
+               fill = cases_per_10000, 
+               group = date))+
+  expand_limits(x = states_map$long, y = states_map$lat) + 
+  labs(fill = "Cases/10000",
+       subtitle = "Date:{closest_state}",
+       title = "States' COVID cumulative cases per 10,000 people")+
+  theme_map()+
+  theme(legend.background = element_blank(),
+        legend.position = "bottom")+
+  labs(title = "States' COVID cumulative cases per 10,000 people")+
+  transition_states(date)
+
+animate(cases_10k_anim, nframes = 200, end_pause = 10)
+```
+
+```{r, eval= FALSE}
+anim_save("covid_10k.gif")
+```
+
+```{r}
+knitr::include_graphics("covid_10k.gif")
+```
+
+>The number of cases per 10000 people seems to stop growing earlier for both Oregon and Washington state. The number of cases per 10000 people seems to grow faster at North and South Dakota after October 2020. 
 
 ## Your first `shiny` app (for next week!)
 
