@@ -330,14 +330,13 @@ knitr::include_graphics("panama.gif")
   
 ```{r, eval = FALSE}
 cumcases <- covid19 %>% 
-  mutate(cumcases = cumsum(cases),
-         sevenlag = lag(cumcases,n = 7,order_by = date)) %>% 
+  mutate(sevenlag = lag(cases,n = 7,order_by = date)) %>% 
   replace_na(list(sevenlag = 0)) %>% 
-  mutate(newcases = cumcases - sevenlag) %>% 
-  filter(cumcases>20)
+  mutate(newcases = cases - sevenlag) %>% 
+  filter(cases>=20)
 
 cases_animate <- cumcases %>% 
-  ggplot(aes(x = cumcases, y = newcases, group = state)) +
+  ggplot(aes(x = cases, y = newcases, group = state)) +
   scale_y_log10(labels = scales::comma)+
   scale_x_log10(labels = scales::comma)+
   geom_path()+
@@ -360,7 +359,7 @@ anim_save("covid.gif")
 knitr::include_graphics("covid.gif")
 ```
  
-> I observe that New York was the state with the highest proportion of new cases per unit increased in cumulative cases. However, Florida took over in the second half of the time frame. 
+> I observe that New York was the state with the highest proportion of new cases per unit increased in cumulative cases. Minnesota started to grow at a lower rate than the other states after the start of the second half of the time frame. 
   
   7. In this exercise you will animate a map of the US, showing how cumulative COVID-19 cases per 10,000 residents has changed over time. This is similar to exercises 11 & 12 from the previous exercises, with the added animation! So, in the end, you should have something like the static map you made there, but animated over all the days. The code below gives the population estimates for each state and loads the `states_map` data. Here is a list of details you should include in the plot:
   
