@@ -344,6 +344,9 @@ cases_animate <- cumcases %>%
   geom_point(aes(color = state))+
   geom_text(aes(label = state), check_overlap = TRUE, color = "pink")+
   theme(legend.position = 0)+
+  labs(title = "Relation of new cases and cumulative sum of cases",
+       y = "New cases",
+       x = "Cumulative sum of cases")+
   transition_reveal(date)
 
 animate(cases_animate, nframes = 200, duration = 30)
